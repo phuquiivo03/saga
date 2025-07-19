@@ -1,4 +1,3 @@
-import { WebIrys } from "@irys/sdk";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import * as path from "path";
@@ -11,14 +10,19 @@ import "dotenv/config";
 dotenv.config();
 
 async function getIrys() {
-    const rpcUrl = process.env.INFURA_RPC || "";
-    const uploader = await Uploader(Ethereum).withWallet(process.env.PRIVATE_KEY).withRpc(rpcUrl).devnet();
+  const rpcUrl = process.env.INFURA_RPC || "";
+  const uploader = await Uploader(Ethereum)
+    .withWallet(process.env.PRIVATE_KEY)
+    .withRpc(rpcUrl)
+    .devnet();
+  
+  console.log(`Connected to Irys with address: ${uploader.address}`);
   return uploader;
 }
 
 async function uploadFile(filePath: string, tags: Array<{ name: string, value: string }> = []) {
   try {
-    const webIrys = await getIrys();
+    const uploader = await getIrys();
     
     // Check if the file exists
     if (!fs.existsSync(filePath)) {
@@ -40,20 +44,20 @@ async function uploadFile(filePath: string, tags: Array<{ name: string, value: s
     ];
     
     // Get the cost to upload
-    const price = await webIrys.getPrice(fileData.length);
+    const price = await uploader.getPrice(fileData.length);
     console.log(`Cost to upload: ${ethers.formatEther(price.toString())} ETH`);
     
     // Fund the upload if needed
-    const balance = await webIrys.getLoadedBalance();
+    const balance = await uploader.getLoadedBalance();
     if (balance < price) {
       console.log("Funding upload...");
-      const fundTx = await webIrys.fund(price);
+      const fundTx = await uploader.fund(price);
       console.log(`Funding successful: ${fundTx.id}`);
     }
     
     // Upload the file
     console.log(`Uploading file: ${fileName}`);
-    const receipt = await webIrys.upload(fileData, {
+    const receipt = await uploader.upload(fileData, {
       tags: allTags
     });
     
@@ -73,7 +77,7 @@ async function uploadFile(filePath: string, tags: Array<{ name: string, value: s
 
 async function uploadMetadata(metadata: any, tags: Array<{ name: string, value: string }> = []) {
   try {
-    const webIrys = await getIrys();
+    const uploader = await getIrys();
     
     // Convert metadata to JSON string
     const metadataStr = JSON.stringify(metadata);
@@ -88,20 +92,20 @@ async function uploadMetadata(metadata: any, tags: Array<{ name: string, value: 
     ];
     
     // Get the cost to upload
-    const price = await webIrys.getPrice(metadataStr.length);
+    const price = await uploader.getPrice(metadataStr.length);
     console.log(`Cost to upload metadata: ${ethers.formatEther(price.toString())} ETH`);
     
     // Fund the upload if needed
-    const balance = await webIrys.getLoadedBalance();
+    const balance = await uploader.getLoadedBalance();
     if (balance < price) {
       console.log("Funding upload...");
-      const fundTx = await webIrys.fund(price);
+      const fundTx = await uploader.fund(price);
       console.log(`Funding successful: ${fundTx.id}`);
     }
     
     // Upload the metadata
     console.log("Uploading metadata...");
-    const receipt = await webIrys.upload(metadataStr, {
+    const receipt = await uploader.upload(metadataStr, {
       tags: allTags
     });
     

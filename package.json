@@ -10,7 +10,8 @@
     "donate": "npx ts-node scripts/donate.ts",
     "upload:file": "npx ts-node scripts/upload-irys.ts file",
     "upload:metadata": "npx ts-node scripts/upload-irys.ts metadata",
-    "crawl": "npx ts-node scripts/crawl-and-upload.ts",
+    "get:metadata": "npx ts-node scripts/get-all-metadata.ts",
+    "get:bounties": "npx ts-node scripts/get-all-bounties.ts",
     "node": "hardhat node"
   },
   "keywords": [],
